@@ -7,7 +7,7 @@ from django.db import models, IntegrityError
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.loader import render_to_string
-from django.utils.timezone import utc
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from django.contrib.sites.models import Site
@@ -124,7 +124,7 @@ class EmailConfirmationManager(models.Manager):
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email_address.email])
         confirmation = self.create(
             email_address=email_address,
-            sent=datetime.datetime.now(utc),
+            sent=now(),
             confirmation_key=confirmation_key
         )
         email_confirmation_sent.send(
@@ -150,7 +150,7 @@ class EmailConfirmation(models.Model):
     def key_expired(self):
         expiration_date = self.sent + datetime.timedelta(
             days=settings.EMAIL_CONFIRMATION_DAYS)
-        return expiration_date <= datetime.datetime.now(utc)
+        return expiration_date <= now()
     key_expired.boolean = True
     
     def __unicode__(self):
